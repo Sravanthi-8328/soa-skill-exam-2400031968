@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:17
+    platform: linux/amd64
+    container_name: backend-postgres
+    environment:
+      POSTGRES_DB: exam123
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "exam123"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d exam123"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: ./BackendCrudProjectSkill
+      dockerfile: Dockerfile
+    image: docker-skill-exam-2400031968:latest
+    container_name: backend-crud-app
+    ports:
+      - "1968:2005"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/exam123
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: "exam123"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
